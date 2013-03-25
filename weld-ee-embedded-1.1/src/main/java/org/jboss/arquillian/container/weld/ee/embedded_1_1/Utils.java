@@ -45,13 +45,13 @@ import org.jboss.shrinkwrap.api.asset.ArchiveAsset;
 final class Utils
 {
    private Utils() {}
-   
+
    @SuppressWarnings("unchecked")
-   static <T> T getBeanReference(BeanManager manager, Class<T> type) 
+   static <T> T getBeanReference(BeanManager manager, Class<T> type)
    {
       Bean<?> bean = manager.resolve(manager.getBeans(type));
       return (T)manager.getReference(
-            bean, 
+            bean,
             type,
             manager.createCreationalContext(null));
    }
@@ -60,7 +60,7 @@ final class Utils
    {
       return archive.getName();
    }
-   
+
    public static Collection<URL> findBeansXml(Archive<?> archive)
    {
       Validate.notNull(archive, "Archive must be specified");
@@ -74,21 +74,21 @@ final class Utils
          }
          ArchiveAsset nestedArchive = (ArchiveAsset)nestedArchiveEntry.getValue().getAsset();
          Map<ArchivePath, Node> classes = nestedArchive.getArchive().getContent(Filters.include(".*/beans.xml"));
-         for(final Map.Entry<ArchivePath, Node> entry : classes.entrySet()) 
+         for(final Map.Entry<ArchivePath, Node> entry : classes.entrySet())
          {
-            try 
+            try
             {
                beansXmls.add(
-                     new URL(null, "archive://" + nestedArchive.getArchive().getName() +  entry.getKey().get(), new URLStreamHandler() 
+                     new URL(null, "archive://" + nestedArchive.getArchive().getName() +  entry.getKey().get(), new URLStreamHandler()
                      {
                         @Override
-                        protected java.net.URLConnection openConnection(URL u) throws java.io.IOException 
+                        protected java.net.URLConnection openConnection(URL u) throws java.io.IOException
                         {
                            return new URLConnection(u)
                            {
                               @Override
                               public void connect() throws IOException { }
-                              
+
                               @Override
                               public InputStream getInputStream()
                                     throws IOException
@@ -98,28 +98,28 @@ final class Utils
                            };
                         };
                      }));
-            } 
+            }
             catch (Exception e) {
                e.printStackTrace();
             }
          }
       }
       Map<ArchivePath, Node> classes = archive.getContent(Filters.include(".*/beans.xml"));
-      for(final Map.Entry<ArchivePath, Node> entry : classes.entrySet()) 
+      for(final Map.Entry<ArchivePath, Node> entry : classes.entrySet())
       {
-         try 
+         try
          {
             beansXmls.add(
-                  new URL(null, "archive://" + entry.getKey().get(), new URLStreamHandler() 
+                  new URL(null, "archive://" + entry.getKey().get(), new URLStreamHandler()
                   {
                      @Override
-                     protected java.net.URLConnection openConnection(URL u) throws java.io.IOException 
+                     protected java.net.URLConnection openConnection(URL u) throws java.io.IOException
                      {
                         return new URLConnection(u)
                         {
                            @Override
                            public void connect() throws IOException { }
-                           
+
                            @Override
                            public InputStream getInputStream()
                                  throws IOException
@@ -129,7 +129,7 @@ final class Utils
                         };
                      };
                   }));
-         } 
+         }
          catch (Exception e) {
             e.printStackTrace();
          }
@@ -169,22 +169,22 @@ final class Utils
          Map<ArchivePath, Node> markerFiles = archive.getContent(Filters.include(".*/beans.xml"));
          if (!markerFiles.isEmpty()) {
             Map<ArchivePath, Node> classes = archive.getContent(Filters.include(".*\\.class"));
-            for(Map.Entry<ArchivePath, Node> classEntry : classes.entrySet()) 
+            for(Map.Entry<ArchivePath, Node> classEntry : classes.entrySet())
             {
                Class<?> loadedClass = classLoader.loadClass(
-                     findClassName(classEntry.getKey())); 
+                     findClassName(classEntry.getKey()));
 
                beanClasses.add(loadedClass);
             }
          }
       }
-      catch (ClassNotFoundException e) 
+      catch (ClassNotFoundException e)
       {
          throw new RuntimeException("Could not load class from archive " + archive.getName(), e);
       }
       return beanClasses;
    }
-   
+
    /*
     *  input:  /org/MyClass.class
     *  output: org.MyClass
@@ -199,6 +199,7 @@ final class Utils
       }
       className = className.replaceAll("\\.class", "");
       className = className.replaceAll("/", ".");
+      className = className.replaceAll("\\\\", ".");
       return className;
    }
 
